@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urls</title>
+</head>
+<body>
+    <table class="table m-4">
+        <thead>
+          <tr  class="row">
+            <th class="col-md-1">#</th>
+            <th class="col-md-4">Url</th>
+            <th class="col-md-2">new url</th>
+            <th class="col-md-0"></th>
+            <th class="col-md-1"></th>
+          </tr>
+        </thead>
+        <tbody>
+        <% if(urls.length !== 0) { %>
+          <% for(let i = 0; i < urls.length; i++) { %>
+            <tr class="row">
+                <th class="col-md-1"><%= i %></th>
+                <td class="col-md-4"><%= urls[i].url %></td>
+                <td class="col-md-2"><%= urls[i].lessUrl %></td>
+                <td class="col-md-0"><button type="button"  data-toggle="modal" class="btn" data-target="#updateModal" id=<%=urls[i].id%>  onclick="getId(this.id)">
+                    <span aria-hidden="true">Edit</span>
+                  </button>
+                </td>
+                <td class="col-md-1"><button type="button" class="close" aria-label="Close" id=<%=urls[i].id%> onclick="deleteUrl(this.id)">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </td>
+            </tr>
+          <% }} %>
+        </tbody>
+      </table>
+      <button type="button" class="btn btn-info m-4" data-toggle="modal" data-target="#exampleModal" >
+        Add url
+      </button>
+      <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Update url</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                      <label for="url" class="col-form-label">Url</label>
+                      <input type="text" class="form-control" id="urlUpdate">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-success" data-dismiss="modal"  id="updateUrl">Update</button>
+            </div>
+          </div>
+        </div>
+      </div>  
+      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Url</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                      <label for="url" class="col-form-label">Url</label>
+                      <input type="text" class="form-control" id="url">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-success" data-dismiss="modal"  id="saveUrl">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script id="worker1" type="javascript/worker">
+        // Rest of your worker code goes here.
+      </script>
+      <script> 
+        const save = document.getElementById('saveUrl');
+        const update = document.getElementById('updateUrl');
+        update.addEventListener('click', updateData, false);
+        save.addEventListener('click', saveData, false);
+        async function deleteUrl(id) {
+            try {
+            
+              const response = await fetch(`/urls`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({id})
+                });
+                if (!response.ok) {
+                    const json = await response.json();
+                    console.log(json.message);
+                    
+                }
+                window.location.href = "/urls";
+
+            } catch (error) {
+            console.log(error);
+            
+            }
+        }
+
+        let id;
+        function getId(val) {
+            id = val;
+        }
+
+        async function updateData (e) {
+            
+            
+        e.preventDefault();
+        const url = document.getElementById("urlUpdate").value;
+        const urls = {
+            id,
+            url,
+        }
+        
+        
+        try {
+            const response = await fetch('/urls', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(urls)
+            });
+            if (!response.ok) {
+                const json = await response.json();
+                console.log(json);
+                
+            } else {
+              window.location.href = "/urls";
+            }
+
+        } catch (error) {
+            console.log(error);
+            
+        }
+        
+
+    }
+
+    async function saveData (e) {
+        e.preventDefault();
+
+        const url = document.getElementById("url").value;
+        
+        const urls = {
+            url,
+        }
+        
+        try {
+            const response = await fetch('/urls', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(urls)
+            });
+            console.log(response.ok);
+            
+            if (!response.ok) {
+                const json = await response.json();
+                console.log(json.message);
+
+                
+            } else {
+              window.location.href = "/urls";
+            }
+            
+        } catch (error) {
+            console.log(error);
+            
+        }
+        
+
+    }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
